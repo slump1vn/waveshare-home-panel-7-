@@ -1,0 +1,10 @@
+Non-Commercial Use Notice
+
+Copyright (c) 2026 Darren Chester
+
+You may use, modify and share this project for personal, educational and
+non-commercial purposes.
+
+You may not sell, bundle, redistribute commercially, or use any part of this
+project in a commercial product or service without prior written permission
+from the copyright holder.
