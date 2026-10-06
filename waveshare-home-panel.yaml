@@ -41,6 +41,8 @@ substitutions:
   # Keep the Home Assistant token in esphome/secrets.yaml as:
   # ha_camera_authorization: "Bearer YOUR_LONG_LIVED_ACCESS_TOKEN"
   home_assistant_url: "https://180.elmarspices.com:8123"
+  # MJPEG stream endpoint used by the Cameras page (one persistent connection).
+  camera_stream_base: "${home_assistant_url}/api/camera_proxy_stream"
   # Frigate camera entities (matches the Frigate integration on Home Assistant).
   cua_truoc_camera_entity: "camera.cua_truoc"
   ngoai_ngo_camera_entity: "camera.ngoai_ngo"
@@ -103,6 +105,12 @@ esphome:
       - lvgl.page.show: home_page
       - script.execute: play_startup_audio
       - script.execute: screen_timeout
+
+external_components:
+  - source:
+      type: local
+      path: components
+    components: [mjpeg_stream]
 
 esp32:
   variant: esp32s3
@@ -539,6 +547,11 @@ switch:
         - script.execute: screen_timeout
 
 globals:
+  - id: camera_first_frame
+    type: bool
+    restore_value: no
+    initial_value: 'true'
+
   - id: screen_timeout_seconds
     type: int
     restore_value: true
@@ -750,11 +763,9 @@ script:
           id: active_camera_status
           text: "REFRESHING..."
           text_color: 0xF1C75B
-      - online_image.release: active_camera_frame
-      - delay: 100ms
-      - online_image.set_url:
+      - lambda: id(camera_first_frame) = true;
+      - mjpeg_stream.start:
           id: active_camera_frame
-          update: false
           url: !lambda |-
             const char *entity;
             switch (id(selected_camera)) {
@@ -764,16 +775,7 @@ script:
               case 4: entity = "${tang_2_camera_entity}"; break;
               default: entity = "${cua_truoc_camera_entity}"; break;
             }
-            char url[384];
-            snprintf(
-              url,
-              sizeof(url),
-              "${home_assistant_url}/api/camera_proxy/%s?cache=%lu",
-              entity,
-              (unsigned long) millis()
-            );
-            return std::string(url);
-      - component.update: active_camera_frame
+            return std::string("${camera_stream_base}/") + entity;
       - script.execute: screen_timeout
 
   - id: select_camera_cua_truoc
@@ -787,21 +789,10 @@ script:
           id: active_camera_status
           text: "REQUESTING CUA TRUOC..."
           text_color: 0xF1C75B
-      - online_image.release: active_camera_frame
-      - delay: 100ms
-      - online_image.set_url:
+      - lambda: id(camera_first_frame) = true;
+      - mjpeg_stream.start:
           id: active_camera_frame
-          update: false
-          url: !lambda |-
-            char url[384];
-            snprintf(
-              url,
-              sizeof(url),
-              "${home_assistant_url}/api/camera_proxy/${cua_truoc_camera_entity}?cache=%lu",
-              (unsigned long) millis()
-            );
-            return std::string(url);
-      - component.update: active_camera_frame
+          url: "${camera_stream_base}/${cua_truoc_camera_entity}"
       - script.execute: screen_timeout
 
   - id: select_camera_ngoai_ngo
@@ -815,21 +806,10 @@ script:
           id: active_camera_status
           text: "REQUESTING NGOAI NGO..."
           text_color: 0xF1C75B
-      - online_image.release: active_camera_frame
-      - delay: 100ms
-      - online_image.set_url:
+      - lambda: id(camera_first_frame) = true;
+      - mjpeg_stream.start:
           id: active_camera_frame
-          update: false
-          url: !lambda |-
-            char url[384];
-            snprintf(
-              url,
-              sizeof(url),
-              "${home_assistant_url}/api/camera_proxy/${ngoai_ngo_camera_entity}?cache=%lu",
-              (unsigned long) millis()
-            );
-            return std::string(url);
-      - component.update: active_camera_frame
+          url: "${camera_stream_base}/${ngoai_ngo_camera_entity}"
       - script.execute: screen_timeout
 
   - id: select_camera_nha_phia_sau
@@ -843,21 +823,10 @@ script:
           id: active_camera_status
           text: "REQUESTING NHA PHIA SAU..."
           text_color: 0xF1C75B
-      - online_image.release: active_camera_frame
-      - delay: 100ms
-      - online_image.set_url:
+      - lambda: id(camera_first_frame) = true;
+      - mjpeg_stream.start:
           id: active_camera_frame
-          update: false
-          url: !lambda |-
-            char url[384];
-            snprintf(
-              url,
-              sizeof(url),
-              "${home_assistant_url}/api/camera_proxy/${nha_phia_sau_camera_entity}?cache=%lu",
-              (unsigned long) millis()
-            );
-            return std::string(url);
-      - component.update: active_camera_frame
+          url: "${camera_stream_base}/${nha_phia_sau_camera_entity}"
       - script.execute: screen_timeout
 
   - id: select_camera_san_thuong
@@ -871,21 +840,10 @@ script:
           id: active_camera_status
           text: "REQUESTING SAN THUONG..."
           text_color: 0xF1C75B
-      - online_image.release: active_camera_frame
-      - delay: 100ms
-      - online_image.set_url:
+      - lambda: id(camera_first_frame) = true;
+      - mjpeg_stream.start:
           id: active_camera_frame
-          update: false
-          url: !lambda |-
-            char url[384];
-            snprintf(
-              url,
-              sizeof(url),
-              "${home_assistant_url}/api/camera_proxy/${san_thuong_camera_entity}?cache=%lu",
-              (unsigned long) millis()
-            );
-            return std::string(url);
-      - component.update: active_camera_frame
+          url: "${camera_stream_base}/${san_thuong_camera_entity}"
       - script.execute: screen_timeout
 
   - id: select_camera_tang_2
@@ -899,21 +857,10 @@ script:
           id: active_camera_status
           text: "REQUESTING TANG 2..."
           text_color: 0xF1C75B
-      - online_image.release: active_camera_frame
-      - delay: 100ms
-      - online_image.set_url:
+      - lambda: id(camera_first_frame) = true;
+      - mjpeg_stream.start:
           id: active_camera_frame
-          update: false
-          url: !lambda |-
-            char url[384];
-            snprintf(
-              url,
-              sizeof(url),
-              "${home_assistant_url}/api/camera_proxy/${tang_2_camera_entity}?cache=%lu",
-              (unsigned long) millis()
-            );
-            return std::string(url);
-      - component.update: active_camera_frame
+          url: "${camera_stream_base}/${tang_2_camera_entity}"
       - script.execute: screen_timeout
 
   # -------------------------------------------------------------------------
@@ -3409,43 +3356,37 @@ image:
 
 
 
-  - platform: online_image
+  - platform: mjpeg_stream
     id: active_camera_frame
-    url: "${home_assistant_url}/api/camera_proxy/${cua_truoc_camera_entity}"
+    url: "${camera_stream_base}/${cua_truoc_camera_entity}"
     request_headers:
       Authorization: !secret ha_camera_authorization
-      Accept: "image/jpeg"
-      Cache-Control: "no-cache"
     format: JPEG
     type: RGB565
     byte_order: little_endian
-    resize: 640x320
-    update_interval: never
-    buffer_size: 65535
+    resize: 568x320
+    buffer_size: 131072
 
-    on_download_finished:
+    on_frame:
       then:
-        - logger.log:
-            level: INFO
-            format: "Camera JPEG downloaded successfully"
         - lvgl.image.update:
             id: active_camera_widget
             src: active_camera_frame
-        - lvgl.widget.redraw:
-            id: active_camera_widget
-        - lvgl.label.update:
-            id: active_camera_status
-            text: "LIVE FRAME UPDATED"
-            text_color: 0x63C895
+        - if:
+            condition:
+              lambda: return id(camera_first_frame);
+            then:
+              - lambda: id(camera_first_frame) = false;
+              - lvgl.label.update:
+                  id: active_camera_status
+                  text: "LIVE"
+                  text_color: 0x63C895
 
     on_error:
       then:
-        - logger.log:
-            level: ERROR
-            format: "Camera download or JPEG decode failed"
         - lvgl.label.update:
             id: active_camera_status
-            text: "FAILED: TOKEN, ENTITY OR JPEG"
+            text: "STREAM ERROR - RETRYING"
             text_color: 0xEF6A6A
 
 font:
@@ -6620,6 +6561,8 @@ lvgl:
 
     - id: cameras_page
       styles: page_style
+      on_unload:
+        - mjpeg_stream.stop: active_camera_frame
       widgets:
         - obj:
             x: 0
