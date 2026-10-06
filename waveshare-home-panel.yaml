@@ -111,8 +111,10 @@ esp32:
 
   framework:
     type: esp-idf
-    advanced:
-      execute_from_psram: true
+    # Keep code in flash and use a larger PSRAM cache line so the RGB frame
+    # buffer is not starved of PSRAM bandwidth (prevents screen flicker).
+    sdkconfig_options:
+      CONFIG_ESP32S3_DATA_CACHE_LINE_SIZE_64B: "y"
 
 psram:
   mode: octal
@@ -121,7 +123,7 @@ psram:
 
 logger:
   level: INFO
-  hardware_uart: USB_SERIAL_JTAG
+  hardware_uart: UART0
 
 api:
   reboot_timeout: 0s
@@ -263,24 +265,24 @@ time:
 
 
 # ---------------------------------------------------------------------------
-# Version 28 media player — confirmed working Waveshare connections
-# MAX98357A BCLK -> UART2 TXD / GPIO43
-# MAX98357A LRC  -> UART2 RXD / GPIO44
-# MAX98357A DIN  -> Sensor AD / GPIO6
+# Version 28 media player — Sunton ESP32-8048S070 connections
+# MAX98357A BCLK -> GPIO12 (TF card slot pins; free when no SD card is used)
+# MAX98357A LRC  -> GPIO11
+# MAX98357A DIN  -> GPIO13
 # MAX98357A VIN  -> 5V
 # MAX98357A GND  -> GND
 # ---------------------------------------------------------------------------
 i2s_audio:
   - id: panel_i2s
-    i2s_bclk_pin: GPIO43
-    i2s_lrclk_pin: GPIO44
+    i2s_bclk_pin: GPIO12
+    i2s_lrclk_pin: GPIO11
 
 speaker:
   - platform: i2s_audio
     id: physical_speaker
     i2s_audio_id: panel_i2s
     dac_type: external
-    i2s_dout_pin: GPIO6
+    i2s_dout_pin: GPIO13
     channel: stereo
     sample_rate: 16000
     bits_per_sample: 16bit
@@ -404,17 +406,14 @@ media_player:
 
 i2c:
   id: board_i2c
-  sda: GPIO8
-  scl: GPIO9
+  sda: GPIO19
+  scl: GPIO20
   frequency: 400kHz
   scan: true
 
-ch422g:
-  - id: ch422g_hub
-
 display:
   - platform: mipi_rgb
-    model: ESP32-S3-TOUCH-LCD-7-800X480
+    model: ESP32-8048S070
     id: panel_display
 
     rotation: 0
@@ -422,7 +421,8 @@ display:
     # Both display and LVGL use the same byte order.
     byte_order: big_endian
 
-    pclk_frequency: 16MHz
+    pclk_frequency: 10MHz
+    pclk_inverted: true
     update_interval: never
     auto_clear_enabled: false
 
@@ -431,13 +431,8 @@ touchscreen:
     id: panel_touch
     display: panel_display
     i2c_id: board_i2c
-    interrupt_pin: GPIO4
-
-    reset_pin:
-      ch422g: ch422g_hub
-      number: 1
-      mode:
-        output: true
+    reset_pin: GPIO38
+    update_interval: 30ms
 
     on_touch:
       then:
@@ -457,10 +452,7 @@ switch:
     restore_mode: ALWAYS_ON
 
     pin:
-      ch422g: ch422g_hub
-      number: 2
-      mode:
-        output: true
+      number: GPIO2
       inverted: false
 
   # Automatic notification controls exposed on the Home Assistant device page.
