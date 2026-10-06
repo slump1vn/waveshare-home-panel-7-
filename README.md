@@ -68,3 +68,8 @@ See [docs/WIRING.md](docs/WIRING.md).
 ## Version
 
 Current project version: **v120 — Modern startup audio**
+
+## Icon credits
+
+- `weather_assets/` – [Meteocons](https://github.com/basmilius/weather-icons) by Bas Milius (MIT), rendered to PNG (160px main, 48px forecast).
+- `ui_icons/` – [Material Design Icons](https://pictogrammers.com/library/mdi/) (Apache-2.0), rendered to white 32px PNG.
