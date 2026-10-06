@@ -115,6 +115,10 @@ esp32:
     # buffer is not starved of PSRAM bandwidth (prevents screen flicker).
     sdkconfig_options:
       CONFIG_ESP32S3_DATA_CACHE_LINE_SIZE_64B: "y"
+      # HTTPS camera requests need TLS buffers; keep them out of internal RAM,
+      # which the RGB panel already uses heavily ("HTTP_CLIENT: Allocation failed").
+      CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC: "y"
+      CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL: "4096"
 
 psram:
   mode: octal
@@ -148,7 +152,7 @@ http_request:
   verify_ssl: false
   follow_redirects: true
   redirect_limit: 4
-  buffer_size_rx: 65535
+  buffer_size_rx: 8192
 
 time:
   - platform: homeassistant
@@ -3414,7 +3418,7 @@ image:
       Cache-Control: "no-cache"
     format: JPEG
     type: RGB565
-    byte_order: big_endian
+    byte_order: little_endian
     resize: 640x320
     update_interval: never
     buffer_size: 65535
