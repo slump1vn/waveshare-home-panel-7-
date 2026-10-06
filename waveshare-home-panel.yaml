@@ -40,9 +40,13 @@ substitutions:
   # Camera proxy settings.
   # Keep the Home Assistant token in esphome/secrets.yaml as:
   # ha_camera_authorization: "Bearer YOUR_LONG_LIVED_ACCESS_TOKEN"
-  home_assistant_url: "http://192.168.0.44:8123"
-  hikvision_camera_entity: "camera.hikvision_ds_2cd2746g2_izs_mainstream"
-  front_door_camera_entity: "camera.front_door_fluent"
+  home_assistant_url: "https://180.elmarspices.com:8123"
+  # Frigate camera entities (matches the Frigate integration on Home Assistant).
+  cua_truoc_camera_entity: "camera.cua_truoc"
+  ngoai_ngo_camera_entity: "camera.ngoai_ngo"
+  nha_phia_sau_camera_entity: "camera.nha_phia_sau"
+  san_thuong_camera_entity: "camera.san_thuong_2"
+  tang_2_camera_entity: "camera.tang_2"
 
 # ================================================================
 # VERSION 106.1 MATCHING STATIC FORECAST ICONS - COMPILE FIX
@@ -752,76 +756,40 @@ script:
           text_color: 0xF1C75B
       - online_image.release: active_camera_frame
       - delay: 100ms
-      - if:
-          condition:
-            lambda: return id(selected_camera) == 1;
-          then:
-            - online_image.set_url:
-                id: active_camera_frame
-                update: false
-                url: !lambda |-
-                  char url[384];
-                  snprintf(
-                    url,
-                    sizeof(url),
-                    "${home_assistant_url}/api/camera_proxy/${front_door_camera_entity}?cache=%lu",
-                    (unsigned long) millis()
-                  );
-                  return std::string(url);
-          else:
-            - online_image.set_url:
-                id: active_camera_frame
-                update: false
-                url: !lambda |-
-                  char url[384];
-                  snprintf(
-                    url,
-                    sizeof(url),
-                    "${home_assistant_url}/api/camera_proxy/${hikvision_camera_entity}?cache=%lu",
-                    (unsigned long) millis()
-                  );
-                  return std::string(url);
-      - component.update: active_camera_frame
-      - script.execute: screen_timeout
-
-  - id: select_hikvision_camera
-    mode: restart
-    then:
-      - lambda: id(selected_camera) = 0;
-      - lvgl.label.update:
-          id: active_camera_title
-          text: "HIKVISION MAINSTREAM"
-      - lvgl.label.update:
-          id: active_camera_status
-          text: "REQUESTING HIKVISION..."
-          text_color: 0xF1C75B
-      - online_image.release: active_camera_frame
-      - delay: 100ms
       - online_image.set_url:
           id: active_camera_frame
           update: false
           url: !lambda |-
+            const char *entity;
+            switch (id(selected_camera)) {
+              case 1: entity = "${ngoai_ngo_camera_entity}"; break;
+              case 2: entity = "${nha_phia_sau_camera_entity}"; break;
+              case 3: entity = "${san_thuong_camera_entity}"; break;
+              case 4: entity = "${tang_2_camera_entity}"; break;
+              default: entity = "${cua_truoc_camera_entity}"; break;
+            }
             char url[384];
             snprintf(
               url,
               sizeof(url),
-              "${home_assistant_url}/api/camera_proxy/${hikvision_camera_entity}?cache=%lu",
+              "${home_assistant_url}/api/camera_proxy/%s?cache=%lu",
+              entity,
               (unsigned long) millis()
             );
             return std::string(url);
       - component.update: active_camera_frame
       - script.execute: screen_timeout
 
-  - id: select_front_door_camera
+  - id: select_camera_cua_truoc
     mode: restart
     then:
-      - lambda: id(selected_camera) = 1;
+      - lambda: id(selected_camera) = 0;
       - lvgl.label.update:
           id: active_camera_title
-          text: "FRONT DOOR"
+          text: "CUA TRUOC"
       - lvgl.label.update:
           id: active_camera_status
-          text: "REQUESTING FRONT DOOR..."
+          text: "REQUESTING CUA TRUOC..."
           text_color: 0xF1C75B
       - online_image.release: active_camera_frame
       - delay: 100ms
@@ -833,7 +801,119 @@ script:
             snprintf(
               url,
               sizeof(url),
-              "${home_assistant_url}/api/camera_proxy/${front_door_camera_entity}?cache=%lu",
+              "${home_assistant_url}/api/camera_proxy/${cua_truoc_camera_entity}?cache=%lu",
+              (unsigned long) millis()
+            );
+            return std::string(url);
+      - component.update: active_camera_frame
+      - script.execute: screen_timeout
+
+  - id: select_camera_ngoai_ngo
+    mode: restart
+    then:
+      - lambda: id(selected_camera) = 1;
+      - lvgl.label.update:
+          id: active_camera_title
+          text: "NGOAI NGO"
+      - lvgl.label.update:
+          id: active_camera_status
+          text: "REQUESTING NGOAI NGO..."
+          text_color: 0xF1C75B
+      - online_image.release: active_camera_frame
+      - delay: 100ms
+      - online_image.set_url:
+          id: active_camera_frame
+          update: false
+          url: !lambda |-
+            char url[384];
+            snprintf(
+              url,
+              sizeof(url),
+              "${home_assistant_url}/api/camera_proxy/${ngoai_ngo_camera_entity}?cache=%lu",
+              (unsigned long) millis()
+            );
+            return std::string(url);
+      - component.update: active_camera_frame
+      - script.execute: screen_timeout
+
+  - id: select_camera_nha_phia_sau
+    mode: restart
+    then:
+      - lambda: id(selected_camera) = 2;
+      - lvgl.label.update:
+          id: active_camera_title
+          text: "NHA PHIA SAU"
+      - lvgl.label.update:
+          id: active_camera_status
+          text: "REQUESTING NHA PHIA SAU..."
+          text_color: 0xF1C75B
+      - online_image.release: active_camera_frame
+      - delay: 100ms
+      - online_image.set_url:
+          id: active_camera_frame
+          update: false
+          url: !lambda |-
+            char url[384];
+            snprintf(
+              url,
+              sizeof(url),
+              "${home_assistant_url}/api/camera_proxy/${nha_phia_sau_camera_entity}?cache=%lu",
+              (unsigned long) millis()
+            );
+            return std::string(url);
+      - component.update: active_camera_frame
+      - script.execute: screen_timeout
+
+  - id: select_camera_san_thuong
+    mode: restart
+    then:
+      - lambda: id(selected_camera) = 3;
+      - lvgl.label.update:
+          id: active_camera_title
+          text: "SAN THUONG"
+      - lvgl.label.update:
+          id: active_camera_status
+          text: "REQUESTING SAN THUONG..."
+          text_color: 0xF1C75B
+      - online_image.release: active_camera_frame
+      - delay: 100ms
+      - online_image.set_url:
+          id: active_camera_frame
+          update: false
+          url: !lambda |-
+            char url[384];
+            snprintf(
+              url,
+              sizeof(url),
+              "${home_assistant_url}/api/camera_proxy/${san_thuong_camera_entity}?cache=%lu",
+              (unsigned long) millis()
+            );
+            return std::string(url);
+      - component.update: active_camera_frame
+      - script.execute: screen_timeout
+
+  - id: select_camera_tang_2
+    mode: restart
+    then:
+      - lambda: id(selected_camera) = 4;
+      - lvgl.label.update:
+          id: active_camera_title
+          text: "TANG 2"
+      - lvgl.label.update:
+          id: active_camera_status
+          text: "REQUESTING TANG 2..."
+          text_color: 0xF1C75B
+      - online_image.release: active_camera_frame
+      - delay: 100ms
+      - online_image.set_url:
+          id: active_camera_frame
+          update: false
+          url: !lambda |-
+            char url[384];
+            snprintf(
+              url,
+              sizeof(url),
+              "${home_assistant_url}/api/camera_proxy/${tang_2_camera_entity}?cache=%lu",
               (unsigned long) millis()
             );
             return std::string(url);
@@ -3335,7 +3415,7 @@ image:
 
   - platform: online_image
     id: active_camera_frame
-    url: "${home_assistant_url}/api/camera_proxy/${hikvision_camera_entity}"
+    url: "${home_assistant_url}/api/camera_proxy/${cua_truoc_camera_entity}"
     request_headers:
       Authorization: !secret ha_camera_authorization
       Accept: "image/jpeg"
@@ -3981,7 +4061,7 @@ lvgl:
                         image_recolor_opa: COVER
                   on_click:
                     - lvgl.page.show: cameras_page
-                    - script.execute: select_hikvision_camera
+                    - script.execute: select_camera_cua_truoc
                     - script.execute: screen_timeout
               - button:
                   x: 79
@@ -6575,7 +6655,7 @@ lvgl:
               - label:
                   id: active_camera_title
                   align: CENTER
-                  text: "HIKVISION MAINSTREAM"
+                  text: "CUA TRUOC"
                   text_font: font_14
                   text_color: 0x43F58A
 
@@ -6629,44 +6709,72 @@ lvgl:
         - button:
             x: 72
             y: 408
-            width: 210
+            width: 120
             height: 52
             styles: tile_style
             widgets:
               - label:
                   align: CENTER
-                  text: "HIKVISION"
-                  text_font: font_16
+                  text: "CUA TRUOC"
+                  text_font: font_12
             on_click:
-              - script.execute: select_hikvision_camera
+              - script.execute: select_camera_cua_truoc
 
         - button:
-            x: 295
+            x: 206
             y: 408
-            width: 210
+            width: 120
             height: 52
             styles: tile_style
             widgets:
               - label:
                   align: CENTER
-                  text: "FRONT DOOR"
-                  text_font: font_16
+                  text: "NGOAI NGO"
+                  text_font: font_12
             on_click:
-              - script.execute: select_front_door_camera
+              - script.execute: select_camera_ngoai_ngo
 
         - button:
-            x: 518
+            x: 340
             y: 408
-            width: 210
+            width: 120
             height: 52
             styles: tile_style
             widgets:
               - label:
                   align: CENTER
-                  text: "REFRESH"
-                  text_font: font_16
+                  text: "NHA PHIA SAU"
+                  text_font: font_12
             on_click:
-              - script.execute: refresh_cameras
+              - script.execute: select_camera_nha_phia_sau
+
+        - button:
+            x: 474
+            y: 408
+            width: 120
+            height: 52
+            styles: tile_style
+            widgets:
+              - label:
+                  align: CENTER
+                  text: "SAN THUONG"
+                  text_font: font_12
+            on_click:
+              - script.execute: select_camera_san_thuong
+
+        - button:
+            x: 608
+            y: 408
+            width: 120
+            height: 52
+            styles: tile_style
+            widgets:
+              - label:
+                  align: CENTER
+                  text: "TANG 2"
+                  text_font: font_12
+            on_click:
+              - script.execute: select_camera_tang_2
 
     - id: energy_page
       styles: page_style
