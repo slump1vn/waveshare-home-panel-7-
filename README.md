@@ -1,7 +1,10 @@
-# Waveshare ESP32-S3 Home Assistant Panel
+# ESP32-S3 Home Assistant Panel
 
-A full-screen ESPHome and LVGL dashboard for the Waveshare ESP32-S3 Touch
-LCD 7-inch panel.
+A full-screen ESPHome and LVGL dashboard for the Sunton **ESP32-8048S070**
+(ESP32-S3, 7-inch 800 × 480 RGB touch display).
+
+> The project started on the Waveshare ESP32-S3 Touch LCD 7-inch and has been
+> ported to the Sunton ESP32-8048S070. The YAML now targets the Sunton board.
 
 ## Features
 
@@ -12,7 +15,7 @@ LCD 7-inch panel.
 - Home energy display and high-power alerts
 - Camera proxy images
 - Alarm, person, parcel and doorbell notifications
-- Media player using a MAX98357A I2S amplifier
+- Media player and sounds using an optional MAX98357A I2S amplifier
 - Modern embedded startup sound
 - Clock screensaver
 - Bin collection information
@@ -29,9 +32,9 @@ This project is shared for personal, educational and hobby use.
 
 ## Hardware
 
-- Waveshare ESP32-S3 Touch LCD 7-inch
-- MAX98357A I2S amplifier
-- Suitable speaker
+- Sunton ESP32-8048S070 (ESP32-S3, 16 MB flash, 8 MB octal PSRAM, GT911 touch)
+- Optional: MAX98357A I2S amplifier and a suitable speaker (no speaker is fitted
+  yet; audio is configured but unused)
 - Home Assistant with ESPHome Device Builder
 
 ## Repository contents
@@ -39,6 +42,8 @@ This project is shared for personal, educational and hobby use.
 ```text
 waveshare-home-panel.yaml
 sounds/
+weather_assets/
+ui_icons/
 docs/
 secrets.yaml.example
 CHANGELOG.md
@@ -47,9 +52,9 @@ LICENSE
 
 ## Important before compiling
 
-This repository includes all four WAV files referenced by the dashboard.
-The YAML may also reference image and font assets from your existing ESPHome
-installation; keep those assets in their matching folders before validating.
+This repository includes the WAV files, weather images and UI icons referenced
+by the dashboard. Keep the `sounds`, `weather_assets` and `ui_icons` folders
+beside `waveshare-home-panel.yaml` when compiling.
 
 Never commit your real `secrets.yaml` or Home Assistant access token.
 
@@ -67,7 +72,7 @@ See [docs/WIRING.md](docs/WIRING.md).
 
 ## Version
 
-Current project version: **v120 — Modern startup audio**
+Current project version: **v121 — Sunton ESP32-8048S070 port**
 
 ## Icon credits
 

@@ -17,4 +17,20 @@
 11. Select **Install**.
 12. Use USB for recovery if wireless installation times out.
 
-The startup sound plays after the loading screen reaches `READY`.
+The startup sound plays after the loading screen reaches `READY` (only audible
+once a speaker is connected).
+
+## Flashing from Windows over USB
+
+1. Install ESPHome in a Python 3.11+ virtual environment (`pip install esphome`).
+2. Copy the project, including `secrets.yaml`, `sounds`, `weather_assets` and
+   `ui_icons`, to a short **local** folder such as `C:\esp\panel`. Building
+   from a network share (UNC path) fails.
+3. Set a short ESP-IDF tools path, then run from PowerShell (not Git Bash):
+
+   ```powershell
+   $env:ESPHOME_ESP_IDF_PREFIX = "C:\ESPHome\idf"
+   esphome run waveshare-home-panel.yaml --device COM3
+   ```
+
+   Replace `COM3` with the board's serial port.
