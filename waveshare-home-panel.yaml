@@ -43,12 +43,13 @@ substitutions:
   home_assistant_url: "https://180.elmarspices.com:8123"
   # MJPEG stream endpoint used by the Cameras page (one persistent connection).
   camera_stream_base: "${home_assistant_url}/api/camera_proxy_stream"
-  # Frigate camera entities (matches the Frigate integration on Home Assistant).
-  cua_truoc_camera_entity: "camera.cua_truoc"
-  ngoai_ngo_camera_entity: "camera.ngoai_ngo"
-  nha_phia_sau_camera_entity: "camera.nha_phia_sau"
-  san_thuong_camera_entity: "camera.san_thuong_2"
-  tang_2_camera_entity: "camera.tang_2"
+  # Live camera entities: Home Assistant ffmpeg cameras (configuration.yaml) that
+  # read the Frigate go2rtc restream and output 568x320 MJPEG at 10 fps.
+  cua_truoc_camera_entity: "camera.cua_truoc_live"
+  ngoai_ngo_camera_entity: "camera.ngoai_ngo_live"
+  nha_phia_sau_camera_entity: "camera.nha_phia_sau_live"
+  san_thuong_camera_entity: "camera.san_thuong_live"
+  tang_2_camera_entity: "camera.tang_2_live"
 
 # ================================================================
 # VERSION 106.1 MATCHING STATIC FORECAST ICONS - COMPILE FIX
